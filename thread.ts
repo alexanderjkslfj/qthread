@@ -1,9 +1,12 @@
 import * as general from "./general"
 
+type Respond = (value: any) => void
+type Reject = (value: any) => void
+
 export default class Thread extends EventTarget {
 
     private worker: Worker;
-    private calls: { [id: string]: (value: any) => void } = {}
+    private calls: Map<string, [Respond, Reject]> = new Map<string, [Respond, Reject]>()
     private terminated: boolean = false
 
     get isTerminated(): boolean {
@@ -11,7 +14,7 @@ export default class Thread extends EventTarget {
     }
 
     get isIdle(): boolean {
-        return Object.keys(this.calls).length === 0
+        return (this.calls.size === 0)
     }
 
     constructor() {
@@ -198,30 +201,48 @@ export default class Thread extends EventTarget {
         this.worker.addEventListener("message", e => {
             switch (e.data.action) {
                 case "response": {
-                    if (e.data.id in this.calls) {
-                        // get callback
-                        const callback = this.calls[e.data.id]
-                        // remove callback from callback list
-                        delete this.calls[e.data.id]
-                        // if the worker is to be terminated and there are no more callbacks
-                        if (this.terminated && Object.keys(this.calls).length === 0)
-                            // terminate worker
-                            this.worker.terminate()
-                        // execute callback
-                        callback(general.str2obj(e.data.content))
-                    }
+                    handleResponse(e.data.id, e.data.content)
+                    break
+                }
+                default: {
+                    console.error("Worker sent unknown message.")
                 }
             }
         }, { passive: true })
+
+        function handleResponse(id: string, content: any) {
+            // get callback
+            const callback = this.calls.get(id)?.[0]
+
+            // proceed only if callback exists
+            if (callback !== undefined) {
+
+                // remove callback from callback list
+                this.calls.delete(id)
+
+                // if the worker is to be terminated and there are no more callbacks
+                if (this.terminated && this.isIdle)
+                    // terminate worker
+                    this.worker.terminate()
+
+                // execute callback
+                callback(general.str2obj(content))
+
+            }
+        }
     }
 
-    public terminate(force: boolean = false) {
+    public terminate(force: boolean = false): void {
         this.terminated = true
         if (force) {
             this.worker.terminate()
-            // TODO: error out of remaining calls
-        } else if (Object.keys(this.calls).length === 0)
+            this.calls.forEach(([res, rej]) => {
+                rej(new Error("Worker has been terminated before function finished executing."))
+            })
+            this.calls.clear()
+        } else if (this.isIdle) {
             this.worker.terminate()
+        }
     }
 
     /**
@@ -290,7 +311,7 @@ export default class Thread extends EventTarget {
         return await this.call<T>("callMethod", name, ...parameters)
     }
 
-    private checkTerminated() {
+    private checkTerminated(): void {
         if (this.terminated)
             throw "Attempted to access a terminated Thread."
     }
