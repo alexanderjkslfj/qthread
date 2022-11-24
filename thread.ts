@@ -252,13 +252,13 @@ export default class Thread extends EventTarget {
      * @returns result of action
      */
     private call<T>(action: string, ...parameters: unknown[]): Promise<T> {
-        return new Promise(res => {
+        return new Promise((res, rej) => {
             let id: string
             do {
                 id = Math.random().toString().substring(2)
-            } while (!(id in this.calls))
+            } while (!(this.calls.has(id)))
 
-            this.calls[id] = res
+            this.calls.set(id, [res, rej])
 
             this.worker.postMessage({
                 action: action,
