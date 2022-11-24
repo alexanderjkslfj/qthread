@@ -274,7 +274,7 @@ export default class Thread extends EventTarget {
      * @param method function representing method
      * @returns whether a method with this name already existed
      */
-    public async overwriteMethod(name: string, method: CallableFunction): Promise<boolean> {
+    public async overwriteMethod(method: CallableFunction, name: string): Promise<boolean> {
         this.checkTerminated()
         return await this.call<boolean>("overwriteMethod", name, method)
     }
@@ -285,7 +285,7 @@ export default class Thread extends EventTarget {
      * @param method function representing method
      * @returns whether a method with this name already existed
      */
-    public async addMethod(name: string, method: CallableFunction): Promise<boolean> {
+    public async addMethod(method: CallableFunction, name: string): Promise<boolean> {
         this.checkTerminated()
         return await this.call<boolean>("addMethod", name, method)
     }
