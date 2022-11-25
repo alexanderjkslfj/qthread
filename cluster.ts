@@ -20,19 +20,37 @@ export default class Cluster {
             this.removeThread()
     }
 
-    public addThread() {
-        this.threads.push(new Thread())
+    /**
+     * Adds a thread to the cluster.
+     */
+    public async addThread(): Promise<void> {
+        const thread = new Thread()
+
+        const promises: Promise<any>[] = []
+
+        for (const entry of this.methods.entries()) {
+            promises.push(thread.addMethod(entry[1], entry[0]))
+        }
+
+        await Promise.all(promises)
+
+        this.threads.push(thread)
     }
 
-    public removeThread(): boolean {
-        if (this.threads.length === 1)
+    /**
+     * Removes a thread from the cluster. Prefers idle threads.
+     * @param force Removed thread is terminated with force. Not recommended.
+     * @returns true if successful, false if no thread to remove exists.
+     */
+    public removeThread(force: boolean = false): boolean {
+        if (this.threads.length === 0)
             return false
 
         const index = Math.max(0, this.threads.findIndex((value: Thread) => {
             return value.isIdle
         }))
 
-        this.threads.splice(index, 1)[0].terminate(false)
+        this.threads.splice(index, 1)[0].terminate(force)
 
         return true
     }
