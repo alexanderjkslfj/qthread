@@ -82,16 +82,13 @@ export default class Cluster {
 
         this.methods.set(fname, method)
 
-        const result = await this.callAll((thread: Thread) => {
+        await this.callAll((thread: Thread) => {
             return (force)
                 ? thread.overwriteMethod(method, fname)
                 : thread.addMethod(method, fname)
         })
 
-        if (result === true)
-            return true
-        else
-            throw result
+        return true
     }
 
     /**
@@ -116,14 +113,11 @@ export default class Cluster {
 
         this.methods.delete(name)
 
-        const result = await this.callAll((thread: Thread) => {
+        await this.callAll((thread: Thread) => {
             return thread.removeMethod(name)
         })
 
-        if (result === true)
-            return true
-        else
-            throw result
+        return true
     }
 
     public async removeMethodByMethod(method: CallableFunction): Promise<boolean> {
@@ -137,25 +131,39 @@ export default class Cluster {
         return false
     }
 
+    public async callMethod<T>(name: string, ...parameters: any[]): Promise<T> {
+        this.checkTerminated()
+
+        return this.threads[this.idleOrRandomThread()].callMethod<T>(name, ...parameters)
+    }
+
+    private idleOrRandomThread(): number {
+        if (this.threads.length === 0)
+            return -1
+
+        let index = this.threads.findIndex((value: Thread) => {
+            return value.isIdle
+        })
+
+        if (index === -1)
+            index = Math.floor(Math.random() * this.threads.length)
+
+        return index
+    }
+
     /**
      * Executes action for every thread simultaneously.
      * @param action callback to execute for every thread
      * @returns true when all threads have finished or false if a thread threw
      */
-    private async callAll<T>(action: (thread: Thread) => Promise<any>): Promise<boolean | Error> {
-        const promises: Promise<any>[] = []
+    private async callAll<T>(action: (thread: Thread) => Promise<T>): Promise<T[]> {
+        const promises: Promise<T>[] = []
 
         for (const thread of this.threads) {
             promises.push(action(thread))
         }
 
-        try {
-            await Promise.all(promises)
-        } catch (err) {
-            return err
-        } finally {
-            return true
-        }
+        return await Promise.all(promises)
     }
 
     public async terminate(force: boolean = false) {
