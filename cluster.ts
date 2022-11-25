@@ -56,27 +56,39 @@ export default class Cluster {
     }
 
     /**
-     * Adds method to cluster
+     * Adds method to cluster if it doesn't exist yet
      * @param method method to add
      * @param name name of the method (random if omitted)
+     * @param force if true acts the same way as overwriteMethod (and always returns true)
      * @returns true if successful, false if name already exists
      */
-    public async addMethod(method: CallableFunction, name?: string): Promise<boolean> {
+    public async addMethod(method: CallableFunction, name?: string, force: boolean = false): Promise<boolean> {
         const fname = (typeof name === "string") ? name : randomKey(this.methods)
 
-        if (this.methods.has(fname))
+        if (!force && this.methods.has(fname))
             return false
 
         this.methods.set(fname, method)
 
         const result = await this.callAll((thread: Thread) => {
-            return thread.addMethod(method, fname)
+            return (force)
+                ? thread.overwriteMethod(method, fname)
+                : thread.addMethod(method, fname)
         })
 
         if (result === true)
             return true
         else
             throw result
+    }
+
+    /**
+     * Adds method to cluster even if it already exists
+     * @param method method to add
+     * @param name name of the method
+     */
+    public async overwriteMethod(method: CallableFunction, name: string): Promise<void> {
+        await this.addMethod(method, name, true)
     }
 
     /**
