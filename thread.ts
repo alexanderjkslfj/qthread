@@ -310,7 +310,7 @@ export default class Thread extends EventTarget {
     }
 
     private checkTerminated(): void {
-        if (this.terminated)
+        if (this.isTerminated)
             throw "Attempted to access a terminated Thread."
     }
 }
