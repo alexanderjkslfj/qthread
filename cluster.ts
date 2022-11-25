@@ -1,5 +1,5 @@
 import Thread from "./thread";
-import { randomKey } from "./util";
+import { randomKey } from "./general";
 
 export default class Cluster {
     private threads: Thread[] = []
@@ -160,7 +160,7 @@ export default class Cluster {
 
     public async terminate(force: boolean = false) {
         this.checkTerminated()
-        
+
         for (const thread of this.threads) {
             thread.terminate(force)
         }

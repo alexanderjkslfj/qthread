@@ -1,5 +1,4 @@
 import * as general from "./general"
-import { randomKey } from "./util";
 
 type Respond = (value: any) => void
 type Reject = (value: any) => void
@@ -254,7 +253,7 @@ export default class Thread extends EventTarget {
      */
     private call<T>(action: string, ...parameters: unknown[]): Promise<T> {
         return new Promise((res, rej) => {
-            const id = randomKey(this.calls)
+            const id = general.randomKey(this.calls)
 
             this.calls.set(id, [res, rej])
 
