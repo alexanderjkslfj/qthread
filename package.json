@@ -2,12 +2,13 @@
   "name": "qthread",
   "version": "1.0.0",
   "description": "Small library to simplify multithreading in the web",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "directories": {
     "test": "tests"
   },
   "scripts": {
-    "test": "node tests/all.ts"
+    "test": "node dist/tests/all.js",
+    "build": "npm exec -- tsc --project tsconfig.json"
   },
   "repository": {
     "type": "git",
