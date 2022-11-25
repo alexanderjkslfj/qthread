@@ -1,22 +1,22 @@
 import Thread from "./thread";
+import { randomKey } from "./util";
 
 export default class Cluster {
-    // [Thread, isAvailable][]
     private threads: Thread[] = []
-    private methods: { [name: string]: CallableFunction }
+    private methods: Map<string, CallableFunction> = new Map<string, CallableFunction>()
 
     constructor() {
         this.addThread()
     }
-    
+
     get threadCount(): number {
         return this.threads.length
     }
 
     set threadCount(count: number) {
-        while(count > this.threads.length)
+        while (count > this.threads.length)
             this.addThread()
-        while(count < this.threads.length)
+        while (count < this.threads.length)
             this.removeThread()
     }
 
@@ -24,14 +24,91 @@ export default class Cluster {
         this.threads.push(new Thread())
     }
 
-    public removeThread() {
-        if(this.threads.length === 1)
-            throw ""
+    public removeThread(): boolean {
+        if (this.threads.length === 1)
+            return false
 
         const index = Math.max(0, this.threads.findIndex((value: Thread) => {
             return value.isIdle
         }))
 
         this.threads.splice(index, 1)[0].terminate(false)
+
+        return true
+    }
+
+    /**
+     * Adds method to cluster
+     * @param method method to add
+     * @param name name of the method (random if omitted)
+     * @returns true if successful, false if name already exists
+     */
+    public async addMethod(method: CallableFunction, name?: string): Promise<boolean> {
+        const fname = (typeof name === "string") ? name : randomKey(this.methods)
+
+        if (this.methods.has(fname))
+            return false
+
+        this.methods.set(fname, method)
+
+        const result = await this.callAll((thread: Thread) => {
+            return thread.addMethod(method, fname)
+        })
+
+        if (result === true)
+            return true
+        else
+            throw result
+    }
+
+    /**
+     * Removes method from cluster
+     * @param name name of the method
+     * @returns true if successful, false if method doesn't exist
+     */
+    public async removeMethodByName(name: string): Promise<boolean> {
+        if (!this.methods.has(name))
+            return false
+
+        this.methods.delete(name)
+
+        const result = await this.callAll((thread: Thread) => {
+            return thread.removeMethod(name)
+        })
+
+        if (result === true)
+            return true
+        else
+            throw result
+    }
+
+    public async removeMethodByMethod(method: CallableFunction): Promise<boolean> {
+        for (const entry of this.methods.entries()) {
+            if (entry[1] === method) {
+                return await this.removeMethodByName(entry[0])
+            }
+        }
+        return false
+    }
+
+    /**
+     * Executes action for every thread simultaneously.
+     * @param action callback to execute for every thread
+     * @returns true when all threads have finished or false if a thread threw
+     */
+    private async callAll<T>(action: (thread: Thread) => Promise<any>): Promise<boolean | Error> {
+        const promises: Promise<any>[] = []
+
+        for (const thread of this.threads) {
+            promises.push(action(thread))
+        }
+
+        try {
+            await Promise.all(promises)
+        } catch (err) {
+            return err
+        } finally {
+            return true
+        }
     }
 }
