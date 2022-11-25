@@ -278,10 +278,10 @@ export default class Thread extends EventTarget {
     }
 
     /**
-     * Adds a method to the methods available to the worker. If a metho with the given name already exists, the method will not be added. Returns true if the method was added.
+     * Adds a method to the methods available to the worker. If a method with the given name already exists, the method will not be added. Returns true if the method was added.
      * @param name name of the method
      * @param method function representing method
-     * @returns whether a method with this name already existed
+     * @returns whether the method could be added
      */
     public async addMethod(method: CallableFunction, name: string): Promise<boolean> {
         this.checkTerminated()
