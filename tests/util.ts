@@ -18,6 +18,6 @@ export function testAll(tests: (() => Promise<boolean>)[], vocal: boolean = true
                 works = false
             }
         }
-        return true
+        return works
     }
 }
