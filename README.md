@@ -1,4 +1,6 @@
 # [WIP] qthread
+![build](https://github.com/alexanderjkslfj/qthread/actions/workflows/main.yml/badge.svg)
+
 Small library to simplify multithreading in the web.
 
 Work in progress; already works for many use cases, but may break in unexpected ways.
