@@ -20,7 +20,11 @@ export default class Thread extends EventTarget {
     constructor() {
         super()
 
+        const thread = this
+
         this.worker = general.inlineWorker(() => {
+
+            const worker = this
 
             const methods: { [name: string]: CallableFunction } = {}
             const actions: { [name: string]: CallableFunction } = {
@@ -53,7 +57,8 @@ export default class Thread extends EventTarget {
              * @param data 
              */
             function respond(id: string, data: any): void {
-                this.postMessage({
+                // @ts-ignore
+                worker.postMessage({
                     action: "response",
                     id: id,
                     content: obj2str(data)
@@ -82,9 +87,11 @@ export default class Thread extends EventTarget {
                     objects.push([object, str]);
 
                     for (const key in object) {
+                        // @ts-ignore
                         const type = typeof object[key];
                         str[1].push({
                             key,
+                            // @ts-ignore
                             value: (["function", "object"].includes(type)) ? obj2str(object[key]) : object[key],
                             type: (["function", "object"].includes(type)) ? 1 : 0
                         });
@@ -212,18 +219,18 @@ export default class Thread extends EventTarget {
 
         function handleResponse(id: string, content: any) {
             // get callback
-            const callback = this.calls.get(id)?.[0]
+            const callback = thread.calls.get(id)?.[0]
 
             // proceed only if callback exists
             if (callback !== undefined) {
 
                 // remove callback from callback list
-                this.calls.delete(id)
+                thread.calls.delete(id)
 
                 // if the worker is to be terminated and there are no more callbacks
-                if (this.terminated && this.isIdle)
+                if (thread.terminated && thread.isIdle)
                     // terminate worker
-                    this.worker.terminate()
+                    thread.worker.terminate()
 
                 // execute callback
                 callback(general.str2obj(content))

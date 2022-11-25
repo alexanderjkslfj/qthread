@@ -1,0 +1,25 @@
+{
+  "name": "qthread",
+  "version": "1.0.0",
+  "description": "Small library to simplify multithreading in the web",
+  "main": "dist/index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "node tests/all.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexanderjkslfj/qthread.git"
+  },
+  "author": "Alex",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/alexanderjkslfj/qthread/issues"
+  },
+  "homepage": "https://github.com/alexanderjkslfj/qthread#readme",
+  "devDependencies": {
+    "typescript": "^4.9.3"
+  }
+}
