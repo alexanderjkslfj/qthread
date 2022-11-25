@@ -1,5 +1,5 @@
 # [WIP] qthread
-![build](https://github.com/alexanderjkslfj/qthread/actions/workflows/main.yml/badge.svg)
+![build](https://github.com/alexanderjkslfj/qthread/actions/workflows/build.yml/badge.svg)
 
 Small library to simplify multithreading in the web.
 
