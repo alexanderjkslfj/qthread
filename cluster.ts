@@ -5,19 +5,15 @@ export default class Cluster {
     private threads: Thread[] = []
     private methods: Map<string, CallableFunction> = new Map<string, CallableFunction>()
 
+    /**
+     * Create a cluster running one thread
+     */
     constructor() {
-        this.addThread()
+        this.threads.push(new Thread())
     }
 
     get threadCount(): number {
         return this.threads.length
-    }
-
-    set threadCount(count: number) {
-        while (count > this.threads.length)
-            this.addThread()
-        while (count < this.threads.length)
-            this.removeThread()
     }
 
     /**
