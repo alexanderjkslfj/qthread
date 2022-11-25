@@ -12,9 +12,9 @@ export function testAll(tests: (() => Promise<boolean>)[], vocal: boolean = true
                         console.log(`Test ${test.name} didn't finish successfully. It returned a wrong result.`)
                     works = false
                 }
-            } catch {
+            } catch(err) {
                 if (vocal)
-                    console.log(`Test ${test.name} didn't finish successfully. It threw an error.`)
+                    console.log(`Test ${test.name} didn't finish successfully. It threw an error:`, err)
                 works = false
             }
         }
