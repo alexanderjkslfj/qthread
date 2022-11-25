@@ -4,15 +4,25 @@ import { randomKey } from "./util";
 export default class Cluster {
     private threads: Thread[] = []
     private methods: Map<string, CallableFunction> = new Map<string, CallableFunction>()
+    private terminated: boolean = false
+
+    public get isTerminated(): boolean {
+        return this.terminated
+    }
+
+    private checkTerminated(): void {
+        if (this.isTerminated)
+            throw "Attempted to access a terminated Cluster."
+    }
 
     /**
      * Create a cluster running one thread
      */
-    constructor() {
+    public constructor() {
         this.threads.push(new Thread())
     }
 
-    get threadCount(): number {
+    public get threadCount(): number {
         return this.threads.length
     }
 
@@ -20,6 +30,8 @@ export default class Cluster {
      * Adds a thread to the cluster.
      */
     public async addThread(): Promise<void> {
+        this.checkTerminated()
+
         const thread = new Thread()
 
         const promises: Promise<any>[] = []
@@ -39,6 +51,8 @@ export default class Cluster {
      * @returns true if successful, false if no thread to remove exists.
      */
     public removeThread(force: boolean = false): boolean {
+        this.checkTerminated()
+
         if (this.threads.length === 0)
             return false
 
@@ -59,6 +73,8 @@ export default class Cluster {
      * @returns true if successful, false if name already exists
      */
     public async addMethod(method: CallableFunction, name?: string, force: boolean = false): Promise<boolean> {
+        this.checkTerminated()
+
         const fname = (typeof name === "string") ? name : randomKey(this.methods)
 
         if (!force && this.methods.has(fname))
@@ -93,6 +109,8 @@ export default class Cluster {
      * @returns true if successful, false if method doesn't exist
      */
     public async removeMethodByName(name: string): Promise<boolean> {
+        this.checkTerminated()
+
         if (!this.methods.has(name))
             return false
 
@@ -109,6 +127,8 @@ export default class Cluster {
     }
 
     public async removeMethodByMethod(method: CallableFunction): Promise<boolean> {
+        this.checkTerminated()
+
         for (const entry of this.methods.entries()) {
             if (entry[1] === method) {
                 return await this.removeMethodByName(entry[0])
@@ -136,5 +156,15 @@ export default class Cluster {
         } finally {
             return true
         }
+    }
+
+    public async terminate(force: boolean = false) {
+        this.checkTerminated()
+        
+        for (const thread of this.threads) {
+            thread.terminate(force)
+        }
+        this.threads.length = 0
+        this.methods.clear()
     }
 }
