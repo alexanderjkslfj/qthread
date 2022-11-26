@@ -1,4 +1,4 @@
-import * as general from "./general"
+import * as general from "./general.js"
 
 type Respond = (value: any) => void
 type Reject = (value: any) => void

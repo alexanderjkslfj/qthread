@@ -1,6 +1,6 @@
-import { testAll } from "./util";
+import { testAll } from "./util.js";
 
-import testCluster from "./cluster";
+import testCluster from "./cluster.js";
 
 const runAllTests = testAll([
     testCluster

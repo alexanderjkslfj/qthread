@@ -1,6 +1,6 @@
-import * as general from "./general"
-import Thread from "./thread";
-import Cluster from "./cluster";
+import * as general from "./general.js"
+import Thread from "./thread.js";
+import Cluster from "./cluster.js";
 
 const inlineWorker = general.inlineWorker
 

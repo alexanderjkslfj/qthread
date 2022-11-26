@@ -1,5 +1,5 @@
-import Thread from "./thread";
-import { randomKey } from "./general";
+import Thread from "./thread.js";
+import { randomKey } from "./general.js";
 
 export default class Cluster {
     private threads: Thread[] = []
