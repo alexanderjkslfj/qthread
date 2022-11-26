@@ -3,7 +3,7 @@
  * @param script the function to be executed; must be a pure function
  * @returns the worker
  */
- export function inlineWorker(script: CallableFunction | string): Worker {
+export function inlineWorker(script: CallableFunction | string): Worker {
     if (script instanceof Function)
         script = fun2str(script)
 
@@ -52,7 +52,7 @@ export function fun2str(fun: CallableFunction): string {
 type serialized = { primitive: true, value: string | number | symbol | boolean } | { primitive: false, value: string }
 
 export function serialize(value: any): serialized {
-    if (["object", "function"].includes(typeof value)) {
+    if (value !== null && ["object", "function"].includes(typeof value)) {
         return {
             primitive: false,
             value: obj2str(value),
@@ -67,11 +67,25 @@ export function serialize(value: any): serialized {
 }
 
 export function serializeAll(...values: any[]): serialized[] {
-    const v: serialized[] = [];
+    const results: serialized[] = [];
     for (const value of values) {
-        v.push(serialize(value));
+        results.push(serialize(value));
     }
-    return v;
+    return results;
+}
+
+export function deserialize(value: serialized) {
+    return (value.primitive)
+        ? value.value
+        : str2obj(value.value)
+}
+
+export function deserializeAll(...values: serialized[]): any[] {
+    const results: any[] = []
+    for (const value of values) {
+        results.push(deserialize(value))
+    }
+    return results
 }
 
 export type stringifiedObject = [string, { key: string, value: string, type: number }[]]
@@ -156,7 +170,7 @@ export function str2fun(str: string): CallableFunction | null {
 
 function randomString(length: number): string {
     let str = ""
-    for(let i = 0; i < length; i++) {
+    for (let i = 0; i < length; i++) {
         str += randomLetter()
     }
     return str
@@ -170,6 +184,6 @@ export function randomKey(map: Map<string, any>): string {
     let key: string
     do {
         key = randomString(8)
-    } while(map.has(key))
+    } while (map.has(key))
     return key
 }
