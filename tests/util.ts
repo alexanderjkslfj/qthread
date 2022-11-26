@@ -6,15 +6,15 @@ export function testAll(tests: (() => Promise<[boolean, any]>)[], vocal: boolean
                 const result = await test()
                 if (result[0]) {
                     if (vocal)
-                        console.log(`Test ${test.name} finished successfully.`)
+                        console.log(`Success: Test ${test.name} finished successfully.`)
                 } else {
                     if (vocal)
-                        console.log(`Test ${test.name} didn't finish successfully. It returned a wrong result:`, result[1])
+                        console.log(`Error: Test ${test.name} didn't finish successfully. It returned a wrong result:`, result[1])
                     works = false
                 }
             } catch(err) {
                 if (vocal)
-                    console.log(`Test ${test.name} didn't finish successfully. It threw an error:`, err)
+                    console.log(`Error: Test ${test.name} didn't finish successfully. It threw an error:`, err)
                 works = false
             }
         }
