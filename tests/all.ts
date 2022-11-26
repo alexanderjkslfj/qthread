@@ -7,7 +7,7 @@ const runAllTests = testAll([
 ], false)
 
 runAllTests().then(success => {
-    console.log(success
+    console.log(success[0]
         ? "All tests finished successfully."
         : "Some tests did not finish successfully."
     )
