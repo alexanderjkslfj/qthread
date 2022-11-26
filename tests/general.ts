@@ -56,5 +56,5 @@ async function serializeDeserializeObject(): Promise<[boolean, [object, any]]> {
 
     const aclone = general.deserialize(general.serialize(a))
 
-    return [((a.b.c.num === aclone.b.c.num) && (aclone.b.c.d.d.d === aclone.b.c)), [a, aclone]]
+    return [((a.b.c.num === aclone.b.c.num) && (aclone.b.c.d.c.d.c === aclone.b.c)), [a, aclone]]
 }
