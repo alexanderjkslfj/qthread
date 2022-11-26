@@ -1,8 +1,10 @@
 import { testAll } from "./util.js";
 
+import testGeneral from "./general.js"
 import testCluster from "./cluster.js";
 
 const runAllTests = testAll([
+    testGeneral,
     testCluster
 ], false)
 
