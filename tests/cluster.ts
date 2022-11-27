@@ -10,6 +10,9 @@ const testCluster = testAll([
 
 export default testCluster
 
+/**
+ * Checks if number of threads matches the expected amount.
+ */
 async function threadCount(): Promise<[boolean, number]> {
     const cluster = new Cluster()
 
@@ -23,6 +26,9 @@ async function threadCount(): Promise<[boolean, number]> {
     return [cluster.threadCount === 2, cluster.threadCount]
 }
 
+/**
+ * Checks if adding and calling a method returns the correct result.
+ */
 async function callMethod(): Promise<[boolean, number]> {
     const cluster = new Cluster()
 
@@ -35,6 +41,9 @@ async function callMethod(): Promise<[boolean, number]> {
     return [result === 3, result]
 }
 
+/**
+ * Checks if calling more methods than available threads returns the correct results.
+ */
 async function callMethods(): Promise<[boolean, number[]]> {
     const cluster = new Cluster()
 
@@ -58,6 +67,9 @@ async function callMethods(): Promise<[boolean, number[]]> {
     ]
 }
 
+/**
+ * Checks if adding a method while a thread is being added works as expected.
+ */
 async function addMethodAfterAddingThread(): Promise<[boolean, number]> {
     const cluster = new Cluster()
 
