@@ -16,7 +16,7 @@ All objects passed must be serialized; therefore passing huge objects can be qui
 
 ```javascript
 // Working with Thread
-import Thread from "thread"
+import Thread from "thread.js"
 
 const thread = new Thread()
 
@@ -37,7 +37,7 @@ console.log(one, two, three)
 
 ```javascript
 // Working with Cluster
-import Cluster from "cluster"
+import Cluster from "cluster.js"
 
 // A Cluster starts with one thread.
 const cluster = new Cluster()
