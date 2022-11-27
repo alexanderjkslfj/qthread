@@ -44,141 +44,6 @@ export default function createThreadWorker(): Worker {
             })
         }
 
-        function obj2str(object: object): string {
-            const objects: [object, general.stringifiedObject][] = [];
-
-            obj2str(object);
-
-            function obj2str(object: object): number | string {
-                if (object === null) {
-                    return "null";
-                }
-
-                for (let i = 0; i < objects.length; i++) {
-                    if (objects[i][0] === object) {
-                        return i;
-                    }
-                }
-
-                const str: general.stringifiedObject = [(typeof object === "function") ? fun2str(object) : "", []]
-                const index = objects.length;
-
-                objects.push([object, str]);
-
-                for (const key in object) {
-                    // @ts-ignore
-                    const type = typeof object[key];
-                    str[1].push({
-                        key,
-                        // @ts-ignore
-                        value: (["function", "object"].includes(type)) ? obj2str(object[key]) : object[key],
-                        type: (["function", "object"].includes(type)) ? 1 : 0
-                    });
-                }
-
-                return index;
-            }
-
-            const raw: general.stringifiedObject[] = [];
-            for (const e of objects) {
-                raw.push(e[1]);
-            }
-
-            return JSON.stringify(raw);
-        }
-
-        type serialized = { primitive: true, value: string | number | symbol | boolean } | { primitive: false, value: string }
-
-        function serialize(value: any): serialized {
-            if (value !== null && ["object", "function"].includes(typeof value)) {
-                return {
-                    primitive: false,
-                    value: obj2str(value),
-                }
-            } else {
-                return {
-                    primitive: true,
-                    value: value,
-                }
-            }
-
-        }
-
-        function deserialize(value: serialized) {
-            return (value.primitive)
-                ? value.value
-                : str2obj(value.value)
-        }
-
-        function deserializeAll(...values: serialized[]): any[] {
-            const results: any[] = []
-            for (const value of values) {
-                results.push(deserialize(value))
-            }
-            return results
-        }
-
-        function str2obj(str: string): any {
-            const input = JSON.parse(str);
-
-            const objects: any[] = [];
-            for (const object of input) {
-                objects.push((object[0] === "")
-                    ? {}
-                    : str2fun(object[0]));
-            }
-
-            for (let i = 0; i < input.length; i++) {
-                for (const val of input[i][1]) {
-                    objects[i][val.key] = (val.type === 0)
-                        ? val.value
-                        : objects[val.value]
-                }
-            }
-
-            return objects[0];
-        }
-
-        function str2fun(str: string): CallableFunction | null {
-            try {
-                let a: CallableFunction;
-                const addfun = function (fun: CallableFunction) {
-                    a = fun;
-                }
-                eval(`addfun(${str})`);
-                a!.prototype = undefined;
-                return a!;
-            } catch {
-                return null;
-            }
-        }
-
-        function fun2str(fun: CallableFunction): string {
-            const name: string = (typeof fun.name === "string") ? fun.name : "";
-
-            let funstr = fun.toString();
-
-            const prefixcheck = funstr.trim();
-            if (!(prefixcheck.charAt(0) === "(" || prefixcheck.substring(0, 6) === "async " || prefixcheck.substring(0, 9) === "function " || prefixcheck.substring(0, 9) === "function(")) {
-                funstr = "function " + funstr;
-            }
-
-            const checkfun = funstr.replace(/\s/g, '');
-
-            let funstrnamed: string;
-            if ((checkfun.substring(0, 14) === "asyncfunction(" || checkfun.substring(0, 9) === "function(")) {
-                let pos = 0;
-                while (funstr.charAt(pos) !== "(") {
-                    pos++;
-                }
-                funstrnamed = `${funstr.slice(0, pos)} ${name}${funstr.slice(pos)}`;
-            } else {
-                funstrnamed = funstr;
-            }
-
-            return funstrnamed;
-        }
-
         /**
          * Adds a method to the methods list.
          * @param name name of the method
@@ -212,6 +77,185 @@ export default function createThreadWorker(): Worker {
                 return new Error(`Unknown Method: ${name}`)
 
             return await methods[name](...parameters)
+        }
+
+        ////// DO NOT DIRECTLY EDIT - ALL CODE HERE IS COPIED FROM GENERAL //////
+
+        /**
+        * A serialized value (which can be stringified).
+        */
+        type serialized = { primitive: true, value: string | number | boolean | null } | { primitive: false, value: string }
+
+        /**
+         * A serializable value (not every object is serializable).
+         */
+        type serializable = string | number | boolean | object | null
+
+        /**
+         * Serialize a value (which may then be stringified).
+         */
+        function serialize(value: serializable): serialized {
+            if (value !== null && typeof value === "object" || typeof value === "function") {
+                return {
+                    primitive: false,
+                    value: obj2str(value),
+                }
+            } else {
+                return {
+                    primitive: true,
+                    value: value,
+                }
+            }
+
+        }
+
+        /**
+         * Deserialize a value.
+         * @param value the value to be deserialized
+         * @returns the deserialized value
+         */
+        function deserialize<T extends serializable>(value: serialized): T {
+            return (value.primitive)
+                ? value.value
+                : str2obj<any>(value.value)
+        }
+
+        /**
+         * Deserialize all values passed
+         * @param values values to be deserialized
+         * @returns an array of serialized values
+         */
+        function deserializeAll<T extends serializable>(...values: serialized[]): T[] {
+            const results: T[] = []
+            for (const value of values) {
+                results.push(deserialize<T>(value))
+            }
+            return results
+        }
+
+        type stringifiedObject = [string, { key: string, value: string, type: number }[]]
+        /**
+         * Properly stringify an object. (Preserves cyclic object values and doesn't add unnecessary duplication.)
+         * @param object 
+         * @returns 
+         */
+        function obj2str(object: object): string {
+            const objects: [object, stringifiedObject][] = [];
+
+            obj2str(object);
+
+            function obj2str(object: object | null): number | string {
+                if (object === null) {
+                    return "null";
+                }
+
+                for (let i = 0; i < objects.length; i++) {
+                    if (objects[i][0] === object) {
+                        return i;
+                    }
+                }
+
+                const str: stringifiedObject = [(typeof object === "function") ? fun2str(object) : "", []]
+                const index = objects.length;
+
+                objects.push([object, str]);
+
+                for (const key in object) {
+                    // @ts-ignore
+                    const type = typeof object[key];
+                    str[1].push({
+                        key,
+                        // @ts-ignore
+                        value: (["function", "object"].includes(type)) ? obj2str(object[key]) : object[key],
+                        type: (["function", "object"].includes(type)) ? 1 : 0
+                    });
+                }
+
+                return index;
+            }
+
+            const raw: stringifiedObject[] = [];
+            for (const e of objects) {
+                raw.push(e[1]);
+            }
+
+            return JSON.stringify(raw);
+        }
+
+        /**
+         * Parse a string created using obj2str
+         * @param str the string to parse
+         * @returns an object
+         */
+        function str2obj<T>(str: string): T {
+            const input = JSON.parse(str);
+
+            const objects: any[] = [];
+            for (const object of input) {
+                objects.push((object[0] === "")
+                    ? {}
+                    : str2fun(object[0]));
+            }
+
+            for (let i = 0; i < input.length; i++) {
+                for (const val of input[i][1]) {
+                    objects[i][val.key] = (val.type === 0)
+                        ? val.value
+                        : objects[val.value]
+                }
+            }
+
+            return objects[0];
+        }
+
+        /**
+         * Convert a stringified funcion to a function, preserving its name and not adding unnecessary closure.
+         * @param str the stringified function
+         * @returns a function
+         */
+        function str2fun(str: string): CallableFunction | null {
+            try {
+                let a: CallableFunction;
+                const addfun = function (fun: CallableFunction) {
+                    a = fun;
+                }
+                eval(`addfun(${str})`);
+                a!.prototype = undefined;
+                return a!;
+            } catch {
+                return null;
+            }
+        }
+
+        /**
+         * Properly stringify a function. (Preserves name.)
+         * @param fun the function to stringify
+         * @returns the stringified function
+         */
+        function fun2str(fun: CallableFunction): string {
+            const name: string = (typeof fun.name === "string") ? fun.name : "";
+
+            let funstr = fun.toString();
+
+            const prefixcheck = funstr.trim();
+            if (!(prefixcheck.charAt(0) === "(" || prefixcheck.substring(0, 6) === "async " || prefixcheck.substring(0, 9) === "function " || prefixcheck.substring(0, 9) === "function(")) {
+                funstr = "function " + funstr;
+            }
+
+            const checkfun = funstr.replace(/\s/g, '');
+
+            let funstrnamed: string;
+            if ((checkfun.substring(0, 14) === "asyncfunction(" || checkfun.substring(0, 9) === "function(")) {
+                let pos = 0;
+                while (funstr.charAt(pos) !== "(") {
+                    pos++;
+                }
+                funstrnamed = `${funstr.slice(0, pos)} ${name}${funstr.slice(pos)}`;
+            } else {
+                funstrnamed = funstr;
+            }
+
+            return funstrnamed;
         }
     })
 }
