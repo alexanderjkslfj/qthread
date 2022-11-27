@@ -56,7 +56,7 @@ async function serializeDeserializeObject(): Promise<[boolean, [object, any]]> {
 
     a.b.c.d = d
 
-    const aclone = general.deserialize(general.serialize(a))
+    const aclone = general.deserialize<any>(general.serialize(a))
 
     return [((a.b.c.num === aclone.b.c.num) && (aclone.b.c.d.c.d.c === aclone.b.c)), [a, aclone]]
 }
@@ -74,9 +74,9 @@ async function stringifyParseFunction(): Promise<[boolean, [CallableFunction, Ca
         return x + 1
     }
 
-    const newa = general.str2obj(general.obj2str(a))
-    const newb = general.str2obj(general.obj2str(b))
-    const newc = general.str2obj(general.obj2str(c))
+    const newa = general.str2obj<typeof a>(general.obj2str(a))
+    const newb = general.str2obj<typeof b>(general.obj2str(b))
+    const newc = general.str2obj<typeof c>(general.obj2str(c))
 
     const resulta = newa(1)
     const resultb = newb(2)

@@ -78,7 +78,7 @@ export default class Thread extends EventTarget {
      * @param parameters parameters to be passed to the action
      * @returns result of action
      */
-    private call<T>(action: string, ...parameters: unknown[]): Promise<T> {
+    private call<T>(action: string, ...parameters: general.serializable[]): Promise<T> {
         return new Promise((res, rej) => {
             const id = general.randomKey(this.calls)
 
