@@ -65,6 +65,66 @@ cluster.terminate()
 console.log(...results)
 ```
 
+```javascript
+// Working with inlineWorker
+import { inlineWorker } from "./src/general.js"
+
+// create a worker
+const worker = inlineWorker(function () {
+    const window = this
+
+    // this listener retrieves the message sent by worker.postMessage
+    window.addEventListener("message", e => {
+
+        if(e.data.action === "add") {
+            // using this.postMessage the worker can return a message
+            window.postMessage(
+                e.data.values[0] + e.data.values[1]
+            )
+        }
+
+    })
+})
+
+// this listener is called when the worker posts a message
+worker.addEventListener("message", e => {
+
+    if(e.data === 3)
+        console.log("Success!")
+    else
+        console.log("Failure.")
+
+})
+
+// send data to the worker
+worker.postMessage({
+    action: "add",
+    values: [1, 2]
+})
+```
+
+```javascript
+// Working with serialization
+import { deserialize, serialize } from "./src/general.js"
+
+const object = {
+    value: 5
+}
+
+// create a cyclic object value
+object.object = object
+
+// clone object
+const clone = deserialize(serialize(object))
+
+console.log(
+    object,
+    clone,
+    object !== clone, // actual clone
+    object.object.object.value === clone.object.object.value // self reference is preserved
+)
+```
+
 ### How to build
 
 You need to have git, node and npm (or equivalent) installed on your system.
