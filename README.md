@@ -4,9 +4,9 @@
 
 Small library to simplify multithreading in the web.
 
-Work in progress; already works for many use cases, but may break in unexpected ways.
+Work in progress: Already works for many use cases but may break in unexpected ways.
 
-While this library eases the creation and usage of multiple threads, the significant performance overhead of communicating with a thread remains. One should only use threads for very heavy or long-runing operations.
+While this library eases the creation and usage of multiple threads, the significant performance overhead of creating and communicating with a thread remains. One should only use threads for very heavy or long-running operations.
 
 Since in javascript, threads are completely seperate from each other, all functions passed must be pure.
 
