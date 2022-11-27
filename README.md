@@ -4,7 +4,7 @@
 
 Small library to simplify multithreading in the web.
 
-Work in progress: Already works for many use cases but may break in unexpected ways.
+Work in progress: Already works for most use cases but may break in unexpected ways, as it is not thoroughly tested yet.
 
 While this library eases the creation and usage of multiple threads, the significant performance overhead of creating and communicating with a thread remains. One should only use threads for very heavy or long-running operations.
 
@@ -13,6 +13,8 @@ Since in javascript, threads are completely seperate from each other, all functi
 This means that most objects instanciated from classes can not be passed.
 
 All objects passed must be serialized; therefore passing huge objects can be quite costly.
+
+### Hot to use
 
 ```javascript
 // Working with Thread
@@ -62,3 +64,84 @@ cluster.terminate()
 
 console.log(...results)
 ```
+
+```javascript
+// Working with inlineWorker
+import { inlineWorker } from "./src/general.js"
+
+// create a worker
+const worker = inlineWorker(function () {
+    const window = this
+
+    // this listener retrieves the message sent by worker.postMessage
+    window.addEventListener("message", e => {
+
+        if(e.data.action === "add") {
+            // using this.postMessage the worker can return a message
+            window.postMessage(
+                e.data.values[0] + e.data.values[1]
+            )
+        }
+
+    })
+})
+
+// this listener is called when the worker posts a message
+worker.addEventListener("message", e => {
+
+    if(e.data === 3)
+        console.log("Success!")
+    else
+        console.log("Failure.")
+
+})
+
+// send data to the worker
+worker.postMessage({
+    action: "add",
+    values: [1, 2]
+})
+```
+
+```javascript
+// Working with serialization
+import { deserialize, serialize } from "./src/general.js"
+
+const object = {
+    value: 5
+}
+
+// create a cyclic object value
+object.object = object
+
+// clone object
+const clone = deserialize(serialize(object))
+
+console.log(
+    object,
+    clone,
+    object !== clone, // actual clone
+    object.object.object.value === clone.object.object.value // self reference is preserved
+)
+```
+
+### How to build
+
+You need to have git, node and npm (or equivalent) installed on your system.
+Execute the following commands in the terminal:
+
+```bash
+# get the code
+git clone https://github.com/alexanderjkslfj/qthread.git
+
+# enter directory
+cd qthread
+
+# install typescript (only necessary if typescript is not already globally installed)
+npm ci
+
+# build ts files to js
+npm run build
+```
+
+Now you will find the web ready Javascript files under ```./dist/src```.
