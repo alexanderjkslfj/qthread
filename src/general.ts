@@ -19,40 +19,9 @@ export function inlineWorker(script: CallableFunction | string): Worker {
 }
 
 /**
- * Properly stringify a function. (Preserves name.)
- * @param fun the function to stringify
- * @returns the stringified function
- */
-export function fun2str(fun: CallableFunction): string {
-    const name: string = (typeof fun.name === "string") ? fun.name : "";
-
-    let funstr = fun.toString();
-
-    const prefixcheck = funstr.trim();
-    if (!(prefixcheck.charAt(0) === "(" || prefixcheck.substring(0, 6) === "async " || prefixcheck.substring(0, 9) === "function " || prefixcheck.substring(0, 9) === "function(")) {
-        funstr = "function " + funstr;
-    }
-
-    const checkfun = funstr.replace(/\s/g, '');
-
-    let funstrnamed: string;
-    if ((checkfun.substring(0, 14) === "asyncfunction(" || checkfun.substring(0, 9) === "function(")) {
-        let pos = 0;
-        while (funstr.charAt(pos) !== "(") {
-            pos++;
-        }
-        funstrnamed = `${funstr.slice(0, pos)} ${name}${funstr.slice(pos)}`;
-    } else {
-        funstrnamed = funstr;
-    }
-
-    return funstrnamed;
-}
-
-/**
  * A serialized value (which can be stringified).
  */
-export type serialized = { primitive: true, value: string | number | boolean | null} | { primitive: false, value: string }
+export type serialized = { primitive: true, value: string | number | boolean | null } | { primitive: false, value: string }
 
 /**
  * A serializable value (not every object is serializable).
@@ -210,6 +179,37 @@ export function str2fun(str: string): CallableFunction | null {
     } catch {
         return null;
     }
+}
+
+/**
+ * Properly stringify a function. (Preserves name.)
+ * @param fun the function to stringify
+ * @returns the stringified function
+ */
+export function fun2str(fun: CallableFunction): string {
+    const name: string = (typeof fun.name === "string") ? fun.name : "";
+
+    let funstr = fun.toString();
+
+    const prefixcheck = funstr.trim();
+    if (!(prefixcheck.charAt(0) === "(" || prefixcheck.substring(0, 6) === "async " || prefixcheck.substring(0, 9) === "function " || prefixcheck.substring(0, 9) === "function(")) {
+        funstr = "function " + funstr;
+    }
+
+    const checkfun = funstr.replace(/\s/g, '');
+
+    let funstrnamed: string;
+    if ((checkfun.substring(0, 14) === "asyncfunction(" || checkfun.substring(0, 9) === "function(")) {
+        let pos = 0;
+        while (funstr.charAt(pos) !== "(") {
+            pos++;
+        }
+        funstrnamed = `${funstr.slice(0, pos)} ${name}${funstr.slice(pos)}`;
+    } else {
+        funstrnamed = funstr;
+    }
+
+    return funstrnamed;
 }
 
 /**
