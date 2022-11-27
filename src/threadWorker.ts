@@ -17,15 +17,15 @@ export default function createThreadWorker(): Worker {
         worker.addEventListener("message", async (e: MessageEvent) => {
             if (!(e instanceof MessageEvent)) return
             if (typeof e.data.action !== "string") return
-            respond(e.data.id, await handleData(e.data.action, deserializeAll(e.data.parameters)))
+            respond(e.data.id, await handleData(e.data.action, deserializeAll(...e.data.parameters)))
         }, { passive: true })
 
-        async function handleData(action: string, parameters: any[]): Promise<any> {
+        async function handleData(action: string, parameters: unknown[]): Promise<any> {
             try {
                 if (!(action in actions))
                     return new Error(`Called worker using invalid action: ${action}`)
 
-                return await actions[action](...parameters.map(value => str2obj(value)))
+                return await actions[action](...parameters)
             } catch (err) {
                 return err
             }
@@ -37,7 +37,6 @@ export default function createThreadWorker(): Worker {
          * @param data 
          */
         function respond(id: string, data: any): void {
-            // @ts-ignore
             worker.postMessage({
                 action: "response",
                 id: id,
@@ -103,14 +102,6 @@ export default function createThreadWorker(): Worker {
                 }
             }
 
-        }
-
-        function serializeAll(...values: any[]): serialized[] {
-            const results: serialized[] = [];
-            for (const value of values) {
-                results.push(serialize(value));
-            }
-            return results;
         }
 
         function deserialize(value: serialized) {

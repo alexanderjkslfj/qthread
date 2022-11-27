@@ -87,7 +87,7 @@ export default class Thread extends EventTarget {
             this.worker.postMessage({
                 action: action,
                 id: id,
-                parameters: general.serializeAll(parameters)
+                parameters: general.serializeAll(...parameters)
             })
         })
     }
