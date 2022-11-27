@@ -49,7 +49,7 @@ export function fun2str(fun: CallableFunction): string {
     return funstrnamed;
 }
 
-type serialized = { primitive: true, value: string | number | symbol | boolean } | { primitive: false, value: string }
+export type serialized = { primitive: true, value: string | number | symbol | boolean } | { primitive: false, value: string }
 
 export function serialize(value: any): serialized {
     if (value !== null && ["object", "function"].includes(typeof value)) {
