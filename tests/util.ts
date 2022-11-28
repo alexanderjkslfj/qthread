@@ -14,7 +14,7 @@ export function testAll(tests: (() => Promise<[boolean, any]>)[], vocal: boolean
                 }
             } catch(err) {
                 if (vocal)
-                    console.log(`❌ Error: Test ${test.name} didn't finish successfully. It threw an error:`, err)
+                    console.log(`❌ Error: Test ${test.name} didn't finish successfully. It threw an error: %c${err}`, "color:red;")
                 works = false
             }
         }

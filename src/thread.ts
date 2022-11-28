@@ -28,7 +28,11 @@ export default class Thread extends EventTarget {
         this.worker.addEventListener("message", e => {
             switch (e.data.action) {
                 case "response": {
-                    handleResponse(e.data.id, e.data.content)
+                    handleResponse(e.data.id, e.data.content, false)
+                    break
+                }
+                case "error": {
+                    handleResponse(e.data.id, e.data.content, true)
                     break
                 }
                 default: {
@@ -37,12 +41,12 @@ export default class Thread extends EventTarget {
             }
         }, { passive: true })
 
-        function handleResponse(id: string, content: general.serialized) {
+        function handleResponse(id: string, content: general.serialized, error: boolean = false) {
             // get callback
-            const callback = thread.calls.get(id)?.[0]
+            const callbacks = thread.calls.get(id)
 
             // proceed only if callback exists
-            if (callback !== undefined) {
+            if (callbacks !== undefined) {
 
                 // remove callback from callback list
                 thread.calls.delete(id)
@@ -53,7 +57,10 @@ export default class Thread extends EventTarget {
                     thread.worker.terminate()
 
                 // execute callback
-                callback(general.deserialize(content))
+                if (error)
+                    callbacks[1](content)
+                else
+                    callbacks[0](general.deserialize(content))
 
             }
         }

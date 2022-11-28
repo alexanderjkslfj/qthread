@@ -6,6 +6,8 @@ export default function createThreadWorker(): Worker {
         // @ts-ignore
         const worker: Window = this
 
+        const error = Symbol()
+
         const methods: Map<string, CallableFunction> = new Map<string, CallableFunction>()
         const actions: Map<string, CallableFunction> = new Map<string, CallableFunction>()
         actions.set("addMethod", addMethod)
@@ -24,7 +26,7 @@ export default function createThreadWorker(): Worker {
                 const method = actions.get(action)
 
                 if (method === undefined)
-                    return new Error(`Called worker using invalid action: ${action}`)
+                    return [error, `Called worker using invalid action: ${action}`]
 
                 return await method(...parameters)
             } catch (err) {
@@ -38,11 +40,19 @@ export default function createThreadWorker(): Worker {
          * @param data 
          */
         function respond(id: string, data: any): void {
-            worker.postMessage({
-                action: "response",
-                id: id,
-                content: serialize(data)
-            })
+            if (Array.isArray(data) && data[0] === error) {
+                worker.postMessage({
+                    action: "error",
+                    id: id,
+                    content: data[1]
+                })
+            } else {
+                worker.postMessage({
+                    action: "response",
+                    id: id,
+                    content: serialize(data)
+                })
+            }
         }
 
         /**
@@ -71,7 +81,7 @@ export default function createThreadWorker(): Worker {
             const method = methods.get(name)
 
             if (method === undefined)
-                return new Error(`Unknown Method: ${name}`)
+                return [error, `Unknown Method: ${name}`]
 
             return await method(...parameters)
         }
