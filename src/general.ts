@@ -86,7 +86,7 @@ export function deserializeAll<T extends serializable>(...values: serialized[]):
 /**
  * A stringified object or function. First entry is either a stringified function or an empty string.
  */
-export type stringifiedObject = [string, { key: string, value: string, type: number }[]]
+type stringifiedObject = [string, { key: string, value: string, type: number }[]]
 
 /**
  * Properly stringify an object. (Preserves cyclic object values and doesn't add unnecessary duplication.)
