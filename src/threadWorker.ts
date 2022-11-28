@@ -6,13 +6,12 @@ export default function createThreadWorker(): Worker {
         // @ts-ignore
         const worker: Window = this
 
-        const methods: { [name: string]: CallableFunction } = {}
-        const actions: { [name: string]: CallableFunction } = {
-            "addMethod": addMethod,
-            "removeMethod": removeMethod,
-            "overwriteMethod": overwriteMethod,
-            "callMethod": callMethod
-        }
+        const methods: Map<string, CallableFunction> = new Map<string, CallableFunction>()
+        const actions: Map<string, CallableFunction> = new Map<string, CallableFunction>()
+        actions.set("addMethod", addMethod)
+        actions.set("removeMethod", removeMethod)
+        actions.set("overwriteMethod", overwriteMethod)
+        actions.set("callMethod", callMethod)
 
         worker.addEventListener("message", async (e: MessageEvent) => {
             if (!(e instanceof MessageEvent)) return
@@ -22,10 +21,12 @@ export default function createThreadWorker(): Worker {
 
         async function handleData(action: string, parameters: unknown[]): Promise<any> {
             try {
-                if (!(action in actions))
+                const method = actions.get(action)
+
+                if (method === undefined)
                     return new Error(`Called worker using invalid action: ${action}`)
 
-                return await actions[action](...parameters)
+                return await method(...parameters)
             } catch (err) {
                 return err
             }
@@ -51,32 +52,28 @@ export default function createThreadWorker(): Worker {
          * @returns whether the method could successfully be added (can always be added except for when a method with the given name already exists)
          */
         function addMethod(name: string, method: CallableFunction): boolean {
-            if (name in methods) return false
-            methods[name] = method
+            if (methods.has(name)) return false
+            methods.set(name, method)
             return true
         }
 
         function removeMethod(name: string): boolean {
-            if (name in methods) {
-                delete methods[name]
-                return true
-            }
-            return false
+            return methods.delete(name)
         }
 
         function overwriteMethod(name: string, method: CallableFunction): boolean {
-            if (name in methods) {
-                methods[name] = method
-                return true
-            }
-            return false
+            const hasMethod = methods.has(name)
+            methods.set(name, method)
+            return hasMethod
         }
 
         async function callMethod(name: string, ...parameters: any[]): Promise<any> {
-            if (!(name in methods))
+            const method = methods.get(name)
+
+            if (method === undefined)
                 return new Error(`Unknown Method: ${name}`)
 
-            return await methods[name](...parameters)
+            return await method(...parameters)
         }
 
         ////// DO NOT DIRECTLY EDIT - ALL CODE HERE IS COPIED FROM GENERAL //////
