@@ -114,13 +114,11 @@ export function obj2str(object: object): string {
 
         objects.push([object, str]);
 
-        for (const key in object) {
-            // @ts-ignore
-            const type = typeof object[key];
+        for (const [key, value] of Object.entries(object)) {
+            const type = typeof value;
             str[1].push({
                 key,
-                // @ts-ignore
-                value: (["function", "object"].includes(type)) ? obj2str(object[key]) : object[key],
+                value: (["function", "object"].includes(type)) ? obj2str(value) : value,
                 type: (["function", "object"].includes(type)) ? 1 : 0
             });
         }
