@@ -1,0 +1,13 @@
+import * as general from "./general.js";
+import Thread from "./thread.js";
+import Cluster from "./cluster.js";
+declare const inlineWorker: typeof general.inlineWorker;
+declare const serialize: typeof general.serialize;
+declare const serializeAll: typeof general.serializeAll;
+declare const deserialize: typeof general.deserialize;
+declare const deserializeAll: typeof general.deserializeAll;
+declare const obj2str: typeof general.obj2str;
+declare const str2obj: typeof general.str2obj;
+type serializable = general.serializable;
+type serialized = general.serialized;
+export { Thread, Cluster, inlineWorker, serialize, serializeAll, deserialize, deserializeAll, obj2str, str2obj, serializable, serialized };
