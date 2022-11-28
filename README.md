@@ -1,24 +1,24 @@
-# [WIP] qthread
+# qthread
 [![Build Process](https://github.com/alexanderjkslfj/qthread/actions/workflows/build.yml/badge.svg)](https://github.com/alexanderjkslfj/qthread/actions/workflows/build.yml)
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-brightgreen.svg)](https://opensource.org/licenses/MPL-2.0)
 
 Small library to simplify multithreading in the web.
 
-Work in progress: Already works for most use cases but may break in unexpected ways, as it is not thoroughly tested yet.
-
 While this library eases the creation and usage of multiple threads, the significant performance overhead of creating and communicating with a thread remains. One should only use threads for very heavy or long-running operations.
 
-Since in javascript, threads are completely seperate from each other, all functions passed must be pure.
+Since javascript threads are completely seperate from each other, all functions passed must be pure.
 
 This means that most objects instanciated from classes can not be passed.
 
-All objects passed must be serialized; therefore passing huge objects can be quite costly.
+All objects passed are serialized; therefore passing huge objects can be quite costly.
+
+This library is still in beta. If not used as intended (for example if the methods are not awaited) it can break in unexpected ways.
 
 ### Hot to use
 
 ```javascript
 // Working with Thread
-import Thread from "thread.js"
+import Thread from "index.js"
 
 const thread = new Thread()
 
@@ -39,7 +39,7 @@ console.log(one, two, three)
 
 ```javascript
 // Working with Cluster
-import Cluster from "cluster.js"
+import Cluster from "index.js"
 
 // A Cluster starts with one thread.
 const cluster = new Cluster()
@@ -67,7 +67,7 @@ console.log(...results)
 
 ```javascript
 // Working with inlineWorker
-import { inlineWorker } from "./src/general.js"
+import { inlineWorker } from "index.js"
 
 // create a worker
 const worker = inlineWorker(function () {
@@ -105,7 +105,7 @@ worker.postMessage({
 
 ```javascript
 // Working with serialization
-import { deserialize, serialize } from "./src/general.js"
+import { deserialize, serialize } from "index.js"
 
 const object = {
     value: 5
