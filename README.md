@@ -18,7 +18,7 @@ This library is still in beta. If not used as intended (for example if the metho
 
 ```javascript
 // Working with Thread
-import Thread from "index.js"
+import { Thread } from "index.js"
 
 const thread = new Thread()
 
@@ -39,7 +39,7 @@ console.log(one, two, three)
 
 ```javascript
 // Working with Cluster
-import Cluster from "index.js"
+import { Cluster } from "index.js"
 
 // A Cluster starts with one thread.
 const cluster = new Cluster()
