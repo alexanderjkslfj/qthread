@@ -1,5 +1,5 @@
 import { testAll } from "./util.js";
-import Cluster from "../src/cluster.js";
+import { Cluster } from "../src/index.js";
 
 const testCluster = testAll([
     threadCount,

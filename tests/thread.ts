@@ -1,5 +1,5 @@
 import { testAll } from "./util.js";
-import Thread from "../src/thread.js";
+import { Thread } from "../src/index";
 
 const testThread = testAll([
     callMethod,
