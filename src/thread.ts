@@ -4,20 +4,40 @@ import createThreadWorker from "./threadWorker.js"
 type Respond = (value: any) => void
 type Reject = (value: any) => void
 
+/**
+ * Wrapper containing a single Worker.
+ */
 export default class Thread extends EventTarget {
 
     private worker: Worker;
+
+    /**
+     * The calls actively running in the worker
+     */
     private calls: Map<string, [Respond, Reject]> = new Map<string, [Respond, Reject]>()
+
+    /**
+     * Whether the worker has been terminated
+     */
     private terminated: boolean = false
 
+    /**
+     * Whether the worker has been terminated
+     */
     get isTerminated(): boolean {
         return this.terminated
     }
 
+    /**
+     * Whether the worker is not currently doing anything
+     */
     get isIdle(): boolean {
         return (this.calls.size === 0)
     }
 
+    /**
+     * Creates a Worker with a useful wrapper.
+     */
     constructor() {
         super()
 
@@ -27,11 +47,11 @@ export default class Thread extends EventTarget {
 
         this.worker.addEventListener("message", e => {
             switch (e.data.action) {
-                case "response": {
+                case "response": { // a called Worker method successfully returned a value
                     handleResponse(e.data.id, e.data.content, false)
                     break
                 }
-                case "error": {
+                case "error": { // a called Worker method (or the call itself) threw an error
                     handleResponse(e.data.id, e.data.content, true)
                     break
                 }
@@ -41,6 +61,12 @@ export default class Thread extends EventTarget {
             }
         }, { passive: true })
 
+        /**
+         * Handles a response of the Worker to a call.
+         * @param id the call id (referenced in the calls map)
+         * @param content the return value of the call - (if it's an error it's a simple string, else it is serialized)
+         * @param error whether the return value is an error
+         */
         function handleResponse(id: string, content: general.serialized, error: boolean = false) {
             // get callback
             const callbacks = thread.calls.get(id)
@@ -66,6 +92,10 @@ export default class Thread extends EventTarget {
         }
     }
 
+    /**
+     * Terminates the Thread. No method is allowed to be called after termination.
+     * @param force Whether to cancel all running operations. If false, the Worker is kept alive until all operations are finished.
+     */
     public terminate(force: boolean = false): void {
         this.terminated = true
         if (force) {
@@ -100,7 +130,7 @@ export default class Thread extends EventTarget {
     }
 
     /**
-     * Adds a method to the methods available to the worker. If a method with the given name aready exists, it will be overwritten. Returns true if an overwrite occured.
+     * Adds a custom method to the methods available to the Thread. If a method with the given name aready exists, it will be overwritten. Returns true if an overwrite occured.
      * @param name name of the method
      * @param method function representing method
      * @returns whether a method with this name already existed
@@ -111,7 +141,7 @@ export default class Thread extends EventTarget {
     }
 
     /**
-     * Adds a method to the methods available to the worker. If a method with the given name already exists, the method will not be added. Returns true if the method was added.
+     * Adds a custom method to the methods available to the Thread. If a method with the given name already exists, the method will not be added. Returns true if the method was added.
      * @param name name of the method
      * @param method function representing method
      * @returns whether the method could be added
@@ -122,7 +152,7 @@ export default class Thread extends EventTarget {
     }
 
     /**
-     * Removes a method from the worker. Returns true if the method existed, false if not.
+     * Removes a custom method from the Thread. Returns true if the method existed, false if not.
      * @param name name of the method
      * @returns whether a method with the given name existed and could be removed
      */
@@ -132,16 +162,19 @@ export default class Thread extends EventTarget {
     }
 
     /**
-     * Call a method in the worker.
+     * Calls a custom method of the Thread.
      * @param name name of the method
      * @param parameters parameters passed to the method (must be serializable)
      * @returns return value of the method
      */
-    public async callMethod<T>(name: string, ...parameters: any[]): Promise<T> {
+    public async callMethod<T>(name: string, ...parameters: general.serializable[]): Promise<T> {
         this.checkTerminated()
         return await this.call<T>("callMethod", name, ...parameters)
     }
 
+    /**
+     * Throws an error if Thread has been terminated.
+     */
     private checkTerminated(): void {
         if (this.isTerminated)
             throw "Attempted to access a terminated Thread."

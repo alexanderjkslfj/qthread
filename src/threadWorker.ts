@@ -1,13 +1,28 @@
 import * as general from "./general.js"
 
+/**
+ * Creates a new worker with predefined methods used by Thread.
+ * Not to be used outside of Thread.
+ * @returns A Worker customized for being used by Thread.
+ */
 export default function createThreadWorker(): Worker {
     return general.inlineWorker(function (this: Window) {
 
         const worker: Window = this
 
+        /**
+         * Used to differentiate between a real error and a valid return value (which may also be an error).
+         */
         const error = Symbol()
 
+        /**
+         * Custom methods added to the worker (called using callMethod).
+         */
         const methods: Map<string, CallableFunction> = new Map<string, CallableFunction>()
+
+        /**
+         * Native methods of the worker.
+         */
         const actions: Map<string, CallableFunction> = new Map<string, CallableFunction>()
         actions.set("addMethod", addMethod)
         actions.set("removeMethod", removeMethod)
@@ -55,7 +70,7 @@ export default function createThreadWorker(): Worker {
         }
 
         /**
-         * Adds a method to the methods list.
+         * Adds a method to the methods list. (Can not overwrite existing.)
          * @param name name of the method
          * @param method the method (function) to be added
          * @returns whether the method could successfully be added (can always be added except for when a method with the given name already exists)
@@ -66,17 +81,34 @@ export default function createThreadWorker(): Worker {
             return true
         }
 
+        /**
+         * Removes a method to the methods list.
+         * @param name name of the method
+         * @returns whether a method with that name existed
+         */
         function removeMethod(name: string): boolean {
             return methods.delete(name)
         }
 
+        /**
+         * Adds a method to the methods list. (Can overwrite existing.)
+         * @param name name of the method
+         * @param method the method (function) to be added
+         * @returns whether a method has been overwritten
+         */
         function overwriteMethod(name: string, method: CallableFunction): boolean {
             const hasMethod = methods.has(name)
             methods.set(name, method)
             return hasMethod
         }
 
-        async function callMethod(name: string, ...parameters: any[]): Promise<any> {
+        /**
+         * Calls a method present in the methods list.
+         * @param name name of the method
+         * @param parameters parameters of the method
+         * @returns Return value of the method called. If the method threw an error, [symbol, string] is returned instead (symbol === error).
+         */
+        async function callMethod(name: string, ...parameters: any[]): Promise<any | [symbol, string]> {
             const method = methods.get(name)
 
             if (method === undefined)
