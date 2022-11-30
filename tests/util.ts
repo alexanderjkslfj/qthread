@@ -2,7 +2,7 @@
  * Runs all tests.
  * @param tests The tests to be run. Should return Promise<[boolean, any]>, with boolean being whether the test succeeded and any being the (actual) result.
  * @param vocal Whether to print success or error messages after the tests.
- * @returns a Promise<[boolean, null]> with the boolean being whether all tests were successful.
+ * @returns a Promise<[boolean, null]> with the boolean being whether all tests were successful. (The format allows it to be used as a test.)
  */
 export function testAll(tests: (() => Promise<[boolean, any]>)[], vocal: boolean = true): () => Promise<[boolean, null]> {
     return async (): Promise<[boolean, null]> => {
