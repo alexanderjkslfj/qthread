@@ -1,9 +1,8 @@
 import * as general from "./general.js"
 
 export default function createThreadWorker(): Worker {
-    return general.inlineWorker(() => {
+    return general.inlineWorker(function (this: Window) {
 
-        // @ts-ignore
         const worker: Window = this
 
         const error = Symbol()
