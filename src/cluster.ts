@@ -106,7 +106,7 @@ export default class Cluster {
      * @param name name of the method
      * @returns true if successful, false if method doesn't exist
      */
-    public async removeMethodByName(name: string): Promise<boolean> {
+    private async removeMethodByName(name: string): Promise<boolean> {
         this.checkTerminated()
 
         if (!this.methods.has(name))
@@ -121,7 +121,12 @@ export default class Cluster {
         return true
     }
 
-    public async removeMethodByMethod(method: CallableFunction): Promise<boolean> {
+    /**
+     * Removes method from cluster
+     * @param method function of the method
+     * @returns true if successful, false if method doesn't exist
+     */
+    private async removeMethodByMethod(method: CallableFunction): Promise<boolean> {
         this.checkTerminated()
 
         for (const entry of this.methods.entries()) {
@@ -130,6 +135,26 @@ export default class Cluster {
             }
         }
         return false
+    }
+
+    /**
+     * Removes method from cluster
+     * @param identifier name or function of the method
+     * @returns true if successful, false if method doesn't exist
+     */
+    public async removeMethod(identifier: string | CallableFunction): Promise<boolean> {
+        this.checkTerminated()
+
+        switch(typeof identifier) {
+            case "string":
+                return await this.removeMethodByName(identifier)
+            case "function":
+                return await this.removeMethodByMethod(identifier)
+            default: {
+                console.error("Invalid identifier passed to Cluster.removeMethod:", identifier)
+                return false
+            }
+        }
     }
 
     public async callMethod<T extends serializable>(name: string, ...parameters: any[]): Promise<T> {
