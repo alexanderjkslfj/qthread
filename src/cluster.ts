@@ -192,7 +192,7 @@ export default class Cluster {
         return await Promise.all(promises)
     }
 
-    public async terminate(force: boolean = false) {
+    public terminate(force: boolean = false) {
         this.checkTerminated()
 
         for (const thread of this.threads) {
