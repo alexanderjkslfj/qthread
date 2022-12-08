@@ -15,7 +15,7 @@ All objects passed are serialized; therefore passing huge objects can be quite c
 
 This library is still in beta. If not used as intended (for example if the methods are not awaited) it can break in unexpected ways.
 
-### Hot to use
+## Usage
 
 ```javascript
 // Working with Thread
@@ -126,7 +126,7 @@ console.log(
 )
 ```
 
-### How to build
+## Building
 
 You need to have git, node and npm (or equivalent) installed on your system.
 Execute the following commands in the terminal:
@@ -146,3 +146,73 @@ npm run build
 ```
 
 Now you will find the web ready Javascript files under ```./dist/src```.
+
+## Documentation
+
+### Thread
+A worker with a useful wrapper. It has the following methods:
+##
+
+#### constructor
+Creates a new Thread (which includes a new worker).
+
+Doesn't take any parameters.
+
+Returns: ```Thread```
+##
+
+#### termiate
+Terminates the Thread. No method is allowed to be called after termination.
+This may be necessary to prevent memory leaks.
+
+Doesn't take any parameters.
+
+Returns: ```void```
+##
+
+#### addMethod
+Adds a method to the Thread.
+This method can later be called.
+If a method with the given name already exists, the method will not be added.
+
+| Parameter | Type                    | Description
+| :---      | :---                    | :---
+| method    | ```CallableFunction```  | Method to be added. Must be pure.
+| name      | ```string```            | Name of the method. Used later to call the method.
+
+Returns: ```boolean``` Whether the method was added.
+##
+
+#### overwriteMethod
+Adds a method to the Thread.
+This method can later be called.
+If a method with the given name already exists, it will be overwritten.
+
+| Parameter | Type                    | Description
+| :---      | :---                    | :---
+| method    | ```CallableFunction```  | Method to be added. Must be pure.
+| name      | ```string```            | Name of the method. Used later to call the method.
+
+Returns: ```boolean``` Whether a method with the given name already existed.
+##
+
+#### removeMethod
+Removes a method from the Thread.
+
+| Parameter | Type          | Description         |
+| :---      | :---          | :--                 |
+| name      | ```string```  | Name of the method. |
+
+Returns: ```boolean``` Whether a method with the given name existed.
+##
+
+#### callMethod
+Calls a method from the Thread.
+
+| Parameter     | Type          | Description                                                                     |
+| :---          | :---          | :---                                                                            |
+| <T>           | ```any```     | Type of the return value of the method called. Must be serializable by obj2str. |
+| name          | ```string```  | Name of the method called.                                                      |
+| ...parameters | ```any[]```   | Parameters passed to the method. Must be serializable by obj2str.               |
+
+Returns: ```<T>``` The return value of the method called.
