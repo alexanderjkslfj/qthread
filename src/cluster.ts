@@ -96,8 +96,9 @@ export default class Cluster {
      * @param method method to add
      * @param name name of the method
      */
-    public async overwriteMethod(method: CallableFunction, name: string): Promise<void> {
+    public async overwriteMethod(method: CallableFunction, name: string): Promise<boolean> {
         await this.addMethod(method, name, true)
+        return true
     }
 
     /**
