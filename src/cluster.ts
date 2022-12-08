@@ -1,5 +1,5 @@
 import Thread from "./thread.js";
-import { randomKey } from "./general.js";
+import { randomKey, serializable } from "./general.js";
 
 export default class Cluster {
     private threads: Thread[] = []
@@ -131,7 +131,7 @@ export default class Cluster {
         return false
     }
 
-    public async callMethod<T>(name: string, ...parameters: any[]): Promise<T> {
+    public async callMethod<T extends serializable>(name: string, ...parameters: any[]): Promise<T> {
         this.checkTerminated()
 
         return this.threads[this.idleOrRandomThread()].callMethod<T>(name, ...parameters)

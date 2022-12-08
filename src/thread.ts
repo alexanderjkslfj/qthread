@@ -167,7 +167,7 @@ export default class Thread extends EventTarget {
      * @param parameters parameters passed to the method (must be serializable)
      * @returns return value of the method
      */
-    public async callMethod<T>(name: string, ...parameters: general.serializable[]): Promise<T> {
+    public async callMethod<T extends general.serializable>(name: string, ...parameters: general.serializable[]): Promise<T> {
         this.checkTerminated()
         return await this.call<T>("callMethod", name, ...parameters)
     }
