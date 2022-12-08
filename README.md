@@ -162,10 +162,12 @@ Returns: ```Thread```
 ##
 
 #### termiate
-Terminates the Thread. No method is allowed to be called after termination.
+Terminates the Thread (and the underlying worker). No method is allowed to be called after termination.
 This may be necessary to prevent memory leaks.
 
-Doesn't take any parameters.
+| Parameter | Type      | Default | Description                                                                                                             
+| :---      | :---      | :---    | :---
+| force     | `boolean` | false   | Whether to force cancel all running calls. If false, all running calls will finish before the worker is actually terminated.
 
 Returns: ```void```
 ##
@@ -199,9 +201,9 @@ Returns: ```boolean``` Whether a method with the given name already existed.
 #### removeMethod
 Removes a method from the Thread.
 
-| Parameter | Type          | Description         |
-| :---      | :---          | :--                 |
-| name      | ```string```  | Name of the method. |
+| Parameter | Type          | Description
+| :---      | :---          | :--
+| name      | ```string```  | Name of the method.
 
 Returns: ```boolean``` Whether a method with the given name existed.
 ##
@@ -209,10 +211,98 @@ Returns: ```boolean``` Whether a method with the given name existed.
 #### callMethod
 Calls a method from the Thread.
 
-| Parameter     | Type          | Description                                                                     |
-| :---          | :---          | :---                                                                            |
-| <T>           | ```any```     | Type of the return value of the method called. Must be serializable.            |
-| name          | ```string```  | Name of the method called.                                                      |
-| ...parameters | ```any[]```   | Parameters passed to the method. Must be serializable.                          |
+| Parameter     | Type          | Description
+| :---          | :---          | :---
+| <T>           | ```any```     | Type of the return value of the method called. Must be serializable.
+| name          | ```string```  | Name of the method called.
+| ...parameters | ```any[]```   | Parameters passed to the method. Must be serializable.
 
 Returns: ```<T>``` The return value of the method called.
+
+---
+
+### Cluster
+Manages a group of threads. Passed calls are automatically delegated.
+##
+
+#### constructor
+Creates a new Cluster (which includes a new Thread).
+
+Doesn't take any parameters.
+
+Returns: `Cluster`
+##
+
+#### terminate
+Terminates the Cluster (and the underlying Threads). No method is allowed to be called after termination.
+This may be necessary to prevent memory leaks.
+
+| Parameter | Type      | Default | Description
+| :---      | :---      | :---    | :---
+| force     | `boolean` | false   | Whether to force cancel all running calls. If false, all running calls will finish before their respecive workers are actually terminated.
+
+Returns: `void`
+##
+
+#### addMethod
+Adds a method to the Cluster.
+This method can later be called.
+
+| Parameter | Type                | Default | Description
+| :---      | :---                | :---    | :---
+| method    | `CallableFunction`  | -       | Method to be added. Must be pure.
+| name      | `string`            | -       | Name of the method. Used later to call the method.
+| force     | `boolean`           | false   | Whether to overwrite if a method with the same name already exists.
+
+Returns: `boolean` Whether the method was added.
+##
+
+#### overwriteMethod
+Same as addMethod with force set to true.
+
+| Parameter | Type                | Default | Description
+| :---      | :---                | :---    | :---
+| method    | `CallableFunction`  | -       | Method to be added. Must be pure.
+| name      | `string`            | -       | Name of the method. Used later to call the method.
+
+Returns: `true`
+##
+
+#### removeMethod
+Removes a method from the Cluster.
+
+| Parameter   | Type                        | Description
+| :---        | :---                        | :--
+| identifier  | `string | CallableFunction` | Name or function of the method.
+
+Returns: `boolean` Whether a method with the given name or function existed.
+##
+
+#### callMethod
+Calls a method from the Cluster.
+
+| Parameter     | Type      | Description
+| :---          | :---      | :---
+| <T>           | `any`     | Type of the return value of the method called. Must be serializable.
+| name          | `string`  | Name of the method called.
+| ...parameters | `any[]`   | Parameters passed to the method. Must be serializable.
+
+Returns: `<T>` The return value of the method called.
+##
+
+#### addThread
+Adds a Thread to the Cluster.
+
+Doesn't take any parameters.
+
+Returns: `void`
+##
+
+#### removeThread
+Removes a Thread from the Cluster. Prioritizes idle Threads.
+
+| Parameter | Type      | Default | Description
+| :---      | :---      | :---    | :---
+| force     | `boolean` | false   | Removed Thread is forcefully terminated. Not recommended.
+
+Returns: `boolean` Whether a Thread was successfully removed (false if the Cluster owns no Threads).
