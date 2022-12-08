@@ -157,7 +157,7 @@ export default class Cluster {
         }
     }
 
-    public async callMethod<T extends serializable>(name: string, ...parameters: any[]): Promise<T> {
+    public async callMethod<T extends serializable>(name: string, ...parameters: serializable[]): Promise<T> {
         this.checkTerminated()
 
         return this.threads[this.idleOrRandomThread()].callMethod<T>(name, ...parameters)
