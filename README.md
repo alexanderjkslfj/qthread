@@ -182,7 +182,7 @@ If a method with the given name already exists, the method will not be added.
 | method    | ```CallableFunction```  | Method to be added. Must be pure.
 | name      | ```string```            | Name of the method. Used later to call the method.
 
-Returns: ```boolean``` Whether the method was added.
+Returns: ```Promise<boolean>``` Whether the method was added.
 ##
 
 #### overwriteMethod
@@ -195,7 +195,7 @@ If a method with the given name already exists, it will be overwritten.
 | method    | ```CallableFunction```  | Method to be added. Must be pure.
 | name      | ```string```            | Name of the method. Used later to call the method.
 
-Returns: ```boolean``` Whether a method with the given name already existed.
+Returns: ```Promise<boolean>``` Whether a method with the given name already existed.
 ##
 
 #### removeMethod
@@ -205,7 +205,7 @@ Removes a method from the Thread.
 | :---      | :---          | :--
 | name      | ```string```  | Name of the method.
 
-Returns: ```boolean``` Whether a method with the given name existed.
+Returns: ```Promise<boolean>``` Whether a method with the given name existed.
 ##
 
 #### callMethod
@@ -217,7 +217,7 @@ Calls a method from the Thread.
 | name          | ```string```  | Name of the method called.
 | ...parameters | ```any[]```   | Parameters passed to the method. Must be serializable.
 
-Returns: ```<T>``` The return value of the method called.
+Returns: ```Promise<T>``` The return value of the method called.
 
 ---
 
@@ -254,7 +254,7 @@ This method can later be called.
 | name      | `string`            | -       | Name of the method. Used later to call the method.
 | force     | `boolean`           | false   | Whether to overwrite if a method with the same name already exists.
 
-Returns: `boolean` Whether the method was added.
+Returns: `Promise<boolean>` Whether the method was added.
 ##
 
 #### overwriteMethod
@@ -265,7 +265,7 @@ Same as addMethod with force set to true.
 | method    | `CallableFunction`  | -       | Method to be added. Must be pure.
 | name      | `string`            | -       | Name of the method. Used later to call the method.
 
-Returns: `true`
+Returns: `Promise<true>`
 ##
 
 #### removeMethod
@@ -275,7 +275,7 @@ Removes a method from the Cluster.
 | :---        | :---                        | :--
 | identifier  | `string | CallableFunction` | Name or function of the method.
 
-Returns: `boolean` Whether a method with the given name or function existed.
+Returns: `Promise<boolean>` Whether a method with the given name or function existed.
 ##
 
 #### callMethod
@@ -287,7 +287,7 @@ Calls a method from the Cluster.
 | name          | `string`  | Name of the method called.
 | ...parameters | `any[]`   | Parameters passed to the method. Must be serializable.
 
-Returns: `<T>` The return value of the method called.
+Returns: `Promise<T>` The return value of the method called.
 ##
 
 #### addThread
@@ -295,7 +295,7 @@ Adds a Thread to the Cluster.
 
 Doesn't take any parameters.
 
-Returns: `void`
+Returns: `Promise<void>`
 ##
 
 #### removeThread
