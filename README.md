@@ -211,8 +211,8 @@ Calls a method from the Thread.
 
 | Parameter     | Type          | Description                                                                     |
 | :---          | :---          | :---                                                                            |
-| <T>           | ```any```     | Type of the return value of the method called. Must be serializable by obj2str. |
+| <T>           | ```any```     | Type of the return value of the method called. Must be serializable.            |
 | name          | ```string```  | Name of the method called.                                                      |
-| ...parameters | ```any[]```   | Parameters passed to the method. Must be serializable by obj2str.               |
+| ...parameters | ```any[]```   | Parameters passed to the method. Must be serializable.                          |
 
 Returns: ```<T>``` The return value of the method called.
