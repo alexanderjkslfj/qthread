@@ -251,7 +251,7 @@ This method can later be called.
 | Parameter | Type                | Default | Description
 | :---      | :---                | :---    | :---
 | method    | `CallableFunction`  | -       | Method to be added. Must be pure.
-| name      | `string`            | -       | Name of the method. Used later to call the method.
+| name      | `string`            | random  | Name of the method. Used later to call the method.
 | force     | `boolean`           | false   | Whether to overwrite if a method with the same name already exists.
 
 Returns: `Promise<boolean>` Whether the method was added.
@@ -271,9 +271,9 @@ Returns: `Promise<true>`
 #### removeMethod
 Removes a method from the Cluster.
 
-| Parameter   | Type                        | Description
-| :---        | :---                        | :--
-| identifier  | `string | CallableFunction` | Name or function of the method.
+| Parameter   | Type                          | Description
+| :---        | :---                          | :--
+| identifier  | `string \| CallableFunction`  | Name or function of the method.
 
 Returns: `Promise<boolean>` Whether a method with the given name or function existed.
 ##
@@ -283,7 +283,7 @@ Calls a method from the Cluster.
 
 | Parameter     | Type      | Description
 | :---          | :---      | :---
-| <T>           | `any`     | Type of the return value of the method called. Must be serializable.
+| \<T\>         | `any`     | Type of the return value of the method called. Must be serializable.
 | name          | `string`  | Name of the method called.
 | ...parameters | `any[]`   | Parameters passed to the method. Must be serializable.
 
