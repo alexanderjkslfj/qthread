@@ -2,32 +2,52 @@ import Thread from "./thread.js";
 import { randomKey, serializable } from "./general.js";
 
 export default class Cluster {
+    /**
+     * The Threads managed by the Cluster
+     */
     private threads: Thread[] = []
+
+    /**
+     * All custom methods of the Cluster's Threads
+     */
     private methods: Map<string, CallableFunction> = new Map<string, CallableFunction>()
+
+    /**
+     * Whether the Cluster has been terminated
+     */
     private terminated: boolean = false
 
+    /**
+     * Checks whether the Cluster has been terminated
+     */
     public get isTerminated(): boolean {
         return this.terminated
     }
 
+    /**
+     * Throws an error if the Cluster has been terminated
+     */
     private checkTerminated(): void {
         if (this.isTerminated)
             throw "Attempted to access a terminated Cluster."
     }
 
     /**
-     * Create a cluster running one thread
+     * Creates a new Cluster (which includes a new Thread).
      */
     public constructor() {
         this.threads.push(new Thread())
     }
 
+    /**
+     * Gets the amount of Threads managed by the Cluster
+     */
     public get threadCount(): number {
         return this.threads.length
     }
 
     /**
-     * Adds a thread to the cluster.
+     * Adds a Thread to the Cluster
      */
     public async addThread(): Promise<void> {
         this.checkTerminated()
@@ -46,9 +66,9 @@ export default class Cluster {
     }
 
     /**
-     * Removes a thread from the cluster. Prefers idle threads.
-     * @param force Removed thread is terminated with force. Not recommended.
-     * @returns true if successful, false if no thread to remove exists.
+     * Removes a Thread from the Cluster. Prioritizes idle Threads.
+     * @param force Removed Thread is forcefully terminated. Not recommended.
+     * @returns Whether a Thread was successfully removed (false if the Cluster owns no Threads).
      */
     public removeThread(force: boolean = false): boolean {
         this.checkTerminated()
@@ -66,11 +86,11 @@ export default class Cluster {
     }
 
     /**
-     * Adds method to cluster if it doesn't exist yet
-     * @param method method to add
-     * @param name name of the method (random if omitted)
-     * @param force if true acts the same way as overwriteMethod (and always returns true)
-     * @returns true if successful, false if name already exists
+     * Adds a method to Cluster. This method can later be called.
+     * @param method Method to be added. Must be pure.
+     * @param name Name of the method. Used later to call the method.
+     * @param force Whether to overwrite if a method with the same name already exists.
+     * @returns Whether the method was added.
      */
     public async addMethod(method: CallableFunction, name?: string, force: boolean = false): Promise<boolean> {
         this.checkTerminated()
@@ -92,11 +112,12 @@ export default class Cluster {
     }
 
     /**
-     * Adds method to cluster even if it already exists
-     * @param method method to add
-     * @param name name of the method
+     * Same as addMethod with force set to true.
+     * @param method Method to be added. Must be pure.
+     * @param name Name of the method. Used later to call the method.
+     * @deprecated Use addMethod with force set to true instead.
      */
-    public async overwriteMethod(method: CallableFunction, name: string): Promise<boolean> {
+    public async overwriteMethod(method: CallableFunction, name: string): Promise<true> {
         await this.addMethod(method, name, true)
         return true
     }
@@ -138,9 +159,9 @@ export default class Cluster {
     }
 
     /**
-     * Removes method from cluster
+     * Removes a method from the Cluster.
      * @param identifier name or function of the method
-     * @returns true if successful, false if method doesn't exist
+     * @returns Whether a method with the given name or function existed.
      */
     public async removeMethod(identifier: string | CallableFunction): Promise<boolean> {
         this.checkTerminated()
@@ -157,12 +178,22 @@ export default class Cluster {
         }
     }
 
+    /**
+     * Calls a method from the Cluster.
+     * @param name Name of the method called.
+     * @param parameters Parameters passed to the method. Must be serializable.
+     * @returns The return value of the method called.
+     */
     public async callMethod<T extends serializable>(name: string, ...parameters: serializable[]): Promise<T> {
         this.checkTerminated()
 
         return this.threads[this.idleOrRandomThread()].callMethod<T>(name, ...parameters)
     }
 
+    /**
+     * Gets the index of an idle Thread.
+     * If no idle Thread exists, returns a random index.
+     */
     private idleOrRandomThread(): number {
         if (this.threads.length === 0)
             return -1
@@ -192,6 +223,10 @@ export default class Cluster {
         return await Promise.all(promises)
     }
 
+    /**
+     * Terminates the Thread (and the underlying worker). No method is allowed to be called after termination. This may be necessary to prevent memory leaks.
+     * @param force Whether to force cancel all running calls. If false, all running calls will finish before the worker is actually terminated.
+     */
     public terminate(force: boolean = false) {
         this.checkTerminated()
 
