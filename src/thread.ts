@@ -8,35 +8,37 @@ type Reject = (value: any) => void
  * Wrapper containing a single Worker.
  */
 export default class Thread extends EventTarget {
-
+    /**
+     * the worker managed by the Thread
+     */
     private worker: Worker;
 
     /**
-     * The calls actively running in the worker
+     * the calls actively running in the worker
      */
     private calls: Map<string, [Respond, Reject]> = new Map<string, [Respond, Reject]>()
 
     /**
-     * Whether the worker has been terminated
+     * whether the worker has been terminated
      */
     private terminated: boolean = false
 
     /**
-     * Whether the worker has been terminated
+     * Checks whether the Worker has been terminated.
      */
-    get isTerminated(): boolean {
+    public get isTerminated(): boolean {
         return this.terminated
     }
 
     /**
-     * Whether the worker is not currently doing anything
+     * Checks whether the Thread is not currently doing anything.
      */
-    get isIdle(): boolean {
+    public get isIdle(): boolean {
         return (this.calls.size === 0)
     }
 
     /**
-     * Creates a Worker with a useful wrapper.
+     * Creates a new Thread (which includes a new worker).
      */
     constructor() {
         super()
@@ -93,8 +95,8 @@ export default class Thread extends EventTarget {
     }
 
     /**
-     * Terminates the Thread. No method is allowed to be called after termination.
-     * @param force Whether to cancel all running operations. If false, the Worker is kept alive until all operations are finished.
+     * Terminates the Thread (and the underlying worker). No method is allowed to be called after termination. This may be necessary to prevent memory leaks.
+     * @param force Whether to force cancel all running calls. If false, all running calls will finish before the worker is actually terminated.
      */
     public terminate(force: boolean = false): void {
         this.terminated = true
@@ -111,9 +113,9 @@ export default class Thread extends EventTarget {
 
     /**
      * Calls an action in the worker and returns its result.
-     * @param action action to call
-     * @param parameters parameters to be passed to the action
-     * @returns result of action
+     * @param action Action to call.
+     * @param parameters Parameters to be passed to the action. Must be serializable.
+     * @returns Result of the action.
      */
     private call<T>(action: string, ...parameters: general.serializable[]): Promise<T> {
         return new Promise((res, rej) => {
@@ -130,10 +132,10 @@ export default class Thread extends EventTarget {
     }
 
     /**
-     * Adds a custom method to the methods available to the Thread. If a method with the given name aready exists, it will be overwritten. Returns true if an overwrite occured.
-     * @param name name of the method
-     * @param method function representing method
-     * @returns whether a method with this name already existed
+     * Adds a method to the Thread. This method can later be called. If a method with the given name already exists, it will be overwritten.
+     * @param method Method to be added. Must be pure.
+     * @param name Name of the method. Used later to call the method.
+     * @returns Whether a method with the given name already existed.
      */
     public async overwriteMethod(method: CallableFunction, name: string): Promise<boolean> {
         this.checkTerminated()
@@ -141,10 +143,10 @@ export default class Thread extends EventTarget {
     }
 
     /**
-     * Adds a custom method to the methods available to the Thread. If a method with the given name already exists, the method will not be added. Returns true if the method was added.
-     * @param name name of the method
-     * @param method function representing method
-     * @returns whether the method could be added
+     * Adds a method to the Thread. This method can later be called. If a method with the given name already exists, the method will not be added.
+     * @param name Name of the method. Used later to call the method.
+     * @param method Method to be added. Must be pure.
+     * @returns Whether the method was added.
      */
     public async addMethod(method: CallableFunction, name: string): Promise<boolean> {
         this.checkTerminated()
@@ -152,9 +154,9 @@ export default class Thread extends EventTarget {
     }
 
     /**
-     * Removes a custom method from the Thread. Returns true if the method existed, false if not.
-     * @param name name of the method
-     * @returns whether a method with the given name existed and could be removed
+     * Removes a method from the Thread.
+     * @param name Name of the method.
+     * @returns Whether a method with the given name existed.
      */
     public async removeMethod(name: string): Promise<boolean> {
         this.checkTerminated()
@@ -162,10 +164,10 @@ export default class Thread extends EventTarget {
     }
 
     /**
-     * Calls a custom method of the Thread.
-     * @param name name of the method
-     * @param parameters parameters passed to the method (must be serializable)
-     * @returns return value of the method
+     * Calls a method from the Thread.
+     * @param name Name of the method called.
+     * @param parameters Parameters passed to the method. Must be serializable.
+     * @returns The return value of the method called.
      */
     public async callMethod<T extends general.serializable>(name: string, ...parameters: general.serializable[]): Promise<T> {
         this.checkTerminated()

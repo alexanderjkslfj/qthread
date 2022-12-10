@@ -3,29 +3,29 @@ import { randomKey, serializable } from "./general.js";
 
 export default class Cluster {
     /**
-     * The Threads managed by the Cluster
+     * the Threads managed by the Cluster
      */
     private threads: Thread[] = []
 
     /**
-     * All custom methods of the Cluster's Threads
+     * all custom methods of the Cluster's Threads
      */
     private methods: Map<string, CallableFunction> = new Map<string, CallableFunction>()
 
     /**
-     * Whether the Cluster has been terminated
+     * whether the Cluster has been terminated
      */
     private terminated: boolean = false
 
     /**
-     * Checks whether the Cluster has been terminated
+     * Checks whether the Cluster has been terminated.
      */
     public get isTerminated(): boolean {
         return this.terminated
     }
 
     /**
-     * Throws an error if the Cluster has been terminated
+     * Throws an error if the Cluster has been terminated.
      */
     private checkTerminated(): void {
         if (this.isTerminated)
@@ -40,14 +40,14 @@ export default class Cluster {
     }
 
     /**
-     * Gets the amount of Threads managed by the Cluster
+     * Gets the amount of Threads managed by the Cluster.
      */
     public get threadCount(): number {
         return this.threads.length
     }
 
     /**
-     * Adds a Thread to the Cluster
+     * Adds a Thread to the Cluster.
      */
     public async addThread(): Promise<void> {
         this.checkTerminated()
@@ -123,9 +123,9 @@ export default class Cluster {
     }
 
     /**
-     * Removes method from cluster
-     * @param name name of the method
-     * @returns true if successful, false if method doesn't exist
+     * Removes a method from the Cluster.
+     * @param name Name of the method.
+     * @returns Whether a method with the given name existed.
      */
     private async removeMethodByName(name: string): Promise<boolean> {
         this.checkTerminated()
@@ -143,9 +143,9 @@ export default class Cluster {
     }
 
     /**
-     * Removes method from cluster
-     * @param method function of the method
-     * @returns true if successful, false if method doesn't exist
+     * Removes a method from the Cluster.
+     * @param method Function of the method.
+     * @returns Whether a method with the given function existed.
      */
     private async removeMethodByMethod(method: CallableFunction): Promise<boolean> {
         this.checkTerminated()
@@ -160,7 +160,7 @@ export default class Cluster {
 
     /**
      * Removes a method from the Cluster.
-     * @param identifier name or function of the method
+     * @param identifier Name or function of the method.
      * @returns Whether a method with the given name or function existed.
      */
     public async removeMethod(identifier: string | CallableFunction): Promise<boolean> {
@@ -209,9 +209,9 @@ export default class Cluster {
     }
 
     /**
-     * Executes action for every thread simultaneously.
-     * @param action callback to execute for every thread
-     * @returns true when all threads have finished or false if a thread threw
+     * Executes the action for every thread simultaneously.
+     * @param action The callback to execute on every thread.
+     * @returns Whether no Thread threw an error.
      */
     private async callAll<T>(action: (thread: Thread) => Promise<T>): Promise<T[]> {
         const promises: Promise<T>[] = []
@@ -224,8 +224,8 @@ export default class Cluster {
     }
 
     /**
-     * Terminates the Thread (and the underlying worker). No method is allowed to be called after termination. This may be necessary to prevent memory leaks.
-     * @param force Whether to force cancel all running calls. If false, all running calls will finish before the worker is actually terminated.
+     * Terminates the Cluster (and the underlying Threads). No method is allowed to be called after termination. This may be necessary to prevent memory leaks.
+     * @param force Whether to force cancel all running calls. If false, all running calls will finish before their respecive workers are actually terminated.
      */
     public terminate(force: boolean = false) {
         this.checkTerminated()
