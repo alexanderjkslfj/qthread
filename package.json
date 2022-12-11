@@ -1,10 +1,12 @@
 {
   "name": "qthread",
   "version": "1.0.0",
-  "description": "Small library to simplify multithreading in the web",
-  "main": "dist/src/index.js",
+  "description": "a small library to simplify multithreading in the web",
+  "keywords": ["multithreading", "concurrency", "threads", "workers", "webworker", "web", "library"],
+  "files": ["dist/src/*"],
+  "browser": "./dist/src/index.js",
   "directories": {
-    "test": "tests"
+    "lib": "./dist/src"
   },
   "scripts": {
     "test": "node dist/tests/all.js",
