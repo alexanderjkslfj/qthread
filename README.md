@@ -55,9 +55,9 @@ await cluster.addMethod((a, b) => {
 
 // Since the cluster controls three threads, all these operations are executed simultaneously.
 const results = await Promise.all([
-  await cluster.callMethod("add", 1, 0),
-  await cluster.callMethod("add", 1, 1),
-  await cluster.callMethod("add", 1, 2)
+  cluster.callMethod("add", 1, 0),
+  cluster.callMethod("add", 1, 1),
+  cluster.callMethod("add", 1, 2)
 ])
 
 // Terminates the cluster. If the cluster isn't terminated when it isn't needed anymore, a memory leak may occur.
