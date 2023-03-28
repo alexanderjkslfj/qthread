@@ -23,9 +23,9 @@ import { Thread } from "index.js"
 
 const thread = new Thread()
 
-await thread.addMethod("add", (a, b) => {
+await thread.addMethod((a, b) => {
   return a + b
-})
+}, "add")
 
 // These operations are executed on a different thread
 const one = await thread.callMethod("add", 1, 0)
